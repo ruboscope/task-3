@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра в города</title>
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <style>
+        #header {
+            margin: 20px auto;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        #inputGroup {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        #inputBlock {
+            float: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header">Игра в города</div>
+    <div id="inputGroup">
+        <div id="inputBlock">
+            <input type="text" name="inputRec" id="inputRec">
+        </div>
+        <div id="micBlock">
+            <button id="button" onclick="startButton()">
+                <i class="fas fa-microphone" id="startRecImg" style="font-size:36px"></i>
+            </button>
+        </div>
+    </div>
+    <div id="outoutBlock">
+        <textarea name="outputRec" id="outputRec" cols="30" rows="10"></textarea>
+        <!-- <input type="text" name="outputRec" id="outputRec"> -->
+    </div>
+    <div id="results">
+        <table>
+            <thead>
+                <th>Компьютер</th>
+                <th>Человек</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2lorem</td>
+                    <td>2lorem</td>
+                </tr>
+                <tr>
+                    <td>2lorem</td>
+                    <td>2lorem</td>
+                </tr>
+                <tr>
+                    <td>2lorem</td>
+                    <td>2lorem</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- <script>
+
+        var final_transcript = '';
+        var recognizing = false;
+        var ignore_onend;
+        var start_timestamp;
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onstart = function () {
+            recognizing = true;
+            start_img.src = '/intl/en/chrome/assets/common/images/content/mic-animate.gif';
+        };
+
+        recognition.onend = function () {
+            recognizing = false;
+            if (ignore_onend) {
+                return;
+            }
+            start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+        };
+
+        recognition.onresult = function (event) {
+            var interim_transcript = '';
+            if (typeof (event.results) == 'undefined') {
+                recognition.onend = null;
+                recognition.stop();
+                upgrade();
+                return;
+            }
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+            final_transcript = capitalize(final_transcript);
+            final_span.innerHTML = linebreak(final_transcript);
+            interim_span.innerHTML = linebreak(interim_transcript);
+            if (final_transcript || interim_transcript) {
+                showButtons('inline-block');
+            }
+        };
+
+        var two_line = /\n\n/g;
+        var one_line = /\n/g;
+        function linebreak(s) {
+            return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+        }
+
+        var first_char = /\S/;
+        function capitalize(s) {
+            return s.replace(first_char, function (m) { return m.toUpperCase(); });
+        }
+
+        function startButton(event) {
+            if (recognizing) {
+                recognition.stop();
+                return;
+            }
+            final_transcript = '';
+            recognition.lang = 'ru-RU';
+            recognition.start();
+            ignore_onend = false;
+            final_span.innerHTML = '';
+            interim_span.innerHTML = '';
+            start_img.src = '/intl/en/chrome/assets/common/images/content/mic-slash.gif';
+            start_timestamp = event.timeStamp;
+        }
+
+        function showInfo(s) {
+            if (s) {
+                for (var child = info.firstChild; child; child = child.nextSibling) {
+                    if (child.style) {
+                        child.style.display = child.id == s ? 'inline' : 'none';
+                    }
+                }
+                info.style.visibility = 'visible';
+            } else {
+                info.style.visibility = 'hidden';
+            }
+        }
+    </script> -->
+    <script type="text/javascript">
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+        var recognizing;
+        var recognition = new SpeechRecognition();
+        //        recognition.continuous = false;
+        //        recognition.interimResults = false; 
+        reset();
+        recognition.onend = reset;
+
+        recognition.onstart = function () {
+            recognizing = true;
+            //подсветка кнопки + блокируем инпут
+            // showInfo('info_speak_now');
+            // start_img.src = '/intl/en/chrome/assets/common/images/content/mic-animate.gif';
+        };
+        recognition.onerror = function (event) {
+            // Что будет при ошибке?
+            // if (event.error == 'no-speech') {
+            //     start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+            //     showInfo('info_no_speech');
+            //     ignore_onend = true;
+            // }
+            // if (event.error == 'audio-capture') {
+            //     start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
+            //     showInfo('info_no_microphone');
+            //     ignore_onend = true;
+            // }
+            // if (event.error == 'not-allowed') {
+            //     if (event.timeStamp - start_timestamp < 100) {
+            //         showInfo('info_blocked');
+            //     } else {
+            //         showInfo('info_denied');
+            //     }
+            //     ignore_onend = true;
+            // }
+        };
+
+
+        recognition.onresult = function (event) {
+            for (var i = resultIndex; i < event.results.length; ++i) {
+                if (event.results.final) {
+                    outputRec.value += event.results[i][0].transcript;
+                }
+            }
+        }
+
+        function reset() {
+            recognizing = false;
+            button.innerHTML = "Click to Speak";
+        }
+
+        function startButton() {
+            if (recognizing) {
+                recognition.stop();
+                reset();
+            } else {
+                recognition.start();
+                recognizing = true;
+                button.innerHTML = "Click to Stop";
+            }
+        }
+    </script>
+</body>
+
+</html>
