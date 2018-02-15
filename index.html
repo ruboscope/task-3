@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Игра в города</title>
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     <style>
         #header {
             margin: 20px auto;
@@ -28,7 +29,7 @@
     <div id="header">Игра в города</div>
     <div id="inputGroup">
         <div id="inputBlock">
-            <input type="text" name="inputRec" id="inputRec">
+            <input type="text" name="inputRec" id="inputRec" onblur="inputSearch()">
         </div>
         <div id="micBlock">
             <button id="button" onclick="startButton()">
@@ -40,6 +41,7 @@
         <textarea name="outputRec" id="outputRec" cols="30" rows="10"></textarea>
         <!-- <input type="text" name="outputRec" id="outputRec"> -->
     </div>
+    <div id="map" style="width: 600px; height: 400px"></div>
     <div id="results">
         <table>
             <thead>
@@ -148,8 +150,10 @@
         }
     </script> -->
     <script type="text/javascript">
-        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+        var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
         var recognizing;
+        var personList = [],
+            computerList = [];
         var recognition = new SpeechRecognition();
         //        recognition.continuous = false;
         //        recognition.interimResults = false; 
@@ -186,6 +190,7 @@
 
 
         recognition.onresult = function (event) {
+
             for (var i = resultIndex; i < event.results.length; ++i) {
                 if (event.results.final) {
                     outputRec.value += event.results[i][0].transcript;
@@ -204,9 +209,54 @@
                 reset();
             } else {
                 recognition.start();
-                recognizing = true;
                 button.innerHTML = "Click to Stop";
             }
+        }
+        function inputSearch(){
+            var city = inputRec.value.toLowerCase();
+            if(city.length > 3 && /*city.charAt(0) ==*/ )
+            var myGeocoder = ymaps.geocode(city, { kind: 'locality', results: 1 });
+            myGeocoder.then(
+                    function (res) {
+                        myMap.geoObjects.add(res.geoObjects);
+                        personList.append(city);
+                    },
+                    function (err) {
+                        alert('Ошибка');
+                    }
+                );
+
+        }
+
+        function computerRound(){
+            //block inputa i bottuna
+
+        }
+
+        function personRound(){
+            //unblock inputa i  buttona
+            //zapusk timera
+        }
+
+
+
+
+        /****map****/
+       
+        // Дождёмся загрузки API и готовности DOM.
+        ymaps.ready(init);
+
+        function init() {
+            // Создание экземпляра карты и его привязка к контейнеру с
+            // заданным id ("map").
+            myMap = new ymaps.Map('map', {
+                // При инициализации карты обязательно нужно указать
+                // её центр и коэффициент масштабирования.
+                center: [55.76, 37.64], // Москва
+                zoom: 10
+            }, {
+                    searchControlProvider: 'yandex#search'
+                });
         }
     </script>
 </body>
