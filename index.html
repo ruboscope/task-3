@@ -27,7 +27,18 @@
 
 <body>
     <div id="header">Игра в города</div>
-    <div id="inputGroup">
+    <div id="startButtonBlock">
+        <button id="button" onclick="startGame()">Начать игру</button>
+    </div>
+    <div id="infoBlock">
+        <div id="whosTurn">
+            <span>Ваша очередь</span>
+            <span id="">Очередь компьютера</span>
+        </div>
+        <div id="clock"></div>
+    </div>
+
+    <div id="inputGroup" style="display:none;">
         <div id="inputBlock">
             <input type="text" name="inputRec" id="inputRec">
             <button id="button" onclick="inputSearch()">
@@ -40,31 +51,21 @@
             </button>
         </div>
     </div>
-    <div id="clock"></div>
-    <div id="outoutBlock">
-        <textarea name="outputRec" id="outputRec" cols="30" rows="10"></textarea>
-        <!-- <input type="text" name="outputRec" id="outputRec"> -->
+    <div id="outputBlock" style="display:none;">
+         <label for="outputRec">Названное слово: </label>
+         <input type="text" name="outputRec" id="outputRec" readonly> 
     </div>
-    <div id="map" style="width: 600px; height: 400px"></div>
-    <div id="results">
-        <table>
-            <thead>
+    <div id="map" style="width: 600px; height: 400px; display:none;"></div>
+    <div id="results" style="display: none;">
+        <table id="resultsTable">
+            <tr>
                 <th>Компьютер</th>
                 <th>Человек</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>2lorem</td>
-                    <td>2lorem</td>
-                </tr>
-                <tr>
-                    <td>2lorem</td>
-                    <td>2lorem</td>
-                </tr>
-                <tr>
-                    <td>2lorem</td>
-                    <td>2lorem</td>
-                </tr>
+            </tr>
+            <tr>
+                <td>2lorem</td>
+                <td>2lorem</td>
+            </tr>
             </tbody>
         </table>
     </div>
@@ -221,13 +222,83 @@
         }
         function inputSearch(){
             var city = inputRec.value.toLowerCase();
-            checkCityInLists(city, 0, personList);
-            // if(city.length > 3 && /*city.charAt(0) ==*/ true )
+            if (personList.length > 0){
+                var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
+            }
+            if(city && city.length > 3){
+                if( personList.length > 0 && city.charAt(0) == lastLetter){
+                    checkCityInLists(city, true, personList);
+                }
+                else if(personList.length == 0){
+                    map.style.display = 'block';
+                    checkCityInLists(city, true, personList);
+                }
+                else{
+                    alert('Ваш город начинается не с той буквы! Буква для города -"' + lastLetter + '"');
+                }
+            }
+            else{
+                alert('Ваш город не подходит! Попробуйте другой!')
+            }
+        }
+        function countdownTimer(opponent){
+            if (typeof timer !== 'undefined') clearInterval(timer);
+            var countDownDate = new Date().getTime() + 20000;
+            timer = setInterval(function () {
+                var now = new Date().getTime();
+                var distance = countDownDate - now;
+                var seconds = Math.floor((distance % (1000 * 60)) / 1200);
+                clock.innerHTML = seconds + "s ";
+                if (distance < 0) {
+                    clearInterval(timer);
+                    clock.innerHTML = "Игра окончена";
+                    checkWinner();
+                }
+            }, 1000);
+            if (opponent == false) {
+                    computerRound();
+                }
+            else {
+                // personRound();
+            }
         }
 
-        function checkCityOnMap(city, opponent ,opponentList){
+
+        function computerRound(){ 
+            //block inputa i bottuna
+            var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
+            var letterCityList = cityList.filter(x => x.charAt(0)== lastLetter.toUpperCase());
+            var letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)];
+            checkCityInLists(letterRandName, false, computerList);
+        }
+        function getRandomArbitrary(min, max) {
+                return (Math.random() * (max - min) + min).toFixed(0);
+            }
+
+        // function personRound(){
+        //     //unblock inputa i  buttona
+        //     //zapusk timera
+
+        // }
+
+        function checkCityInLists(city, opponent, opponentList){
+            if (personList.includes(city) || computerList.includes(city)) {
+                if (opponent == false) {
+                    alert('Компьютер ошибся!')
+                    computerRound();
+                }
+                else{
+                    alert('Ошибка! Данное слово уже использовалось! Введите другое слово!');
+                }
+            }
+            else {
+                checkCityOnMapAndPush(city, opponent, opponentList);
+            }
+        }
+        function checkCityOnMapAndPush(city, opponent, opponentList) {
+            var flag = true;
             var myGeocoder = ymaps.geocode(city, { kind: 'locality', results: 1 });
-            var iconColor = ((opponent == 0) ? 'islands#darkBlueDotIconWithCaption': 'islands#redDotIconWithCaption');
+            var iconColor = ((opponent == true) ? 'islands#darkBlueDotIconWithCaption' : 'islands#redDotIconWithCaption');
             myGeocoder.then(
                 function (res) {
                     // Выбираем первый результат геокодирования.
@@ -243,58 +314,33 @@
                     // Добавляем первый найденный геообъект на карту.
                     myMap.geoObjects.add(firstGeoObject);
 
-                    opponentList.push(city);
-                    countdownTimer();
+                    outputRec.value = city.charAt(0).toUpperCase() + city.slice(1);
+                    resultsTable.insertRow(1).insertCell(+opponent).innerHTML = city;
                 },
                 function (err) {
+                    flag = false;
                     alert('Ошибка! Подобный город не найден.');
                 }
             );
-        }
-        function countdownTimer(){
-            if (typeof timer !== 'undefined') clearInterval(timer); 
-            var countDownDate = new Date().getTime() + 20000;
-                timer = setInterval(function () {
-                var now = new Date().getTime();
-                var distance = countDownDate - now;
-                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                clock.innerHTML = seconds + "s ";
-
-                if (distance < 0) {
-                    clearInterval(timer);
-                    clock.innerHTML = "EXPIRED";
-                }
-                }, 1000);
-        }
-
-
-        function computerRound(){
-            countdownTimer();
-            //block inputa i bottuna
-            var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
-            var letterCityList = cityList.filter(x => x.charAt(0).toLowerCase() == lastLetter);
-            var letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].capitalize();
-            checkCityInLists(letterRandName, 1, computerList);
-        }
-        function getRandomArbitrary(min, max) {
-                return (Math.random() * (max - min) + min).toFixed(0);
+            // setTimeout(function(){
+            if(flag){
+                opponentList.push(city);
+                countdownTimer(!opponent);
             }
+            // }, 1000)
+        }
 
-        function personRound(){
-            //unblock inputa i  buttona
-            //zapusk timera
+        function startGame(){
+            inputGroup.style.display = 'block';
+            outputBlock.style.display = 'block';
+            startButtonBlock.style.display = 'none';
+            document.body.style.backgroundColor = '#527a52';
+            document.body.style.color = 'white';
 
         }
 
-        function checkCityInLists(city, opponent, opponentList){
-            if (personList.includes(city) || computerList.includes(city)) {
-                alert('Ошибка! Данное слово уже использовалось! Введите другое слово!');
-            }
-            else {
-                checkCityOnMap(city, opponent, opponentList);
-            }
+        function checkWinner(){
         }
-
 
 
         /****map****/
