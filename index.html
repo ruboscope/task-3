@@ -8,13 +8,42 @@
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     <style>
-        #header {
-            margin: 20px auto;
+        html, body{
+            margin: 0;
+            padding: 0;
+            border: 0;
             font-size: 20px;
+            font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+        }
+        #header {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: .8em;
             text-align: center;
         }
-
-        #inputGroup {
+        #headerInGame{
+            position: relative;
+            margin: 40px auto;
+            text-align: center;
+        }
+        #headerMain{
+            font-size: 2em;
+        }
+        #startGameButton{
+            background-color: #223a5e;
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        #mainBlock{
+            
+        }
+        #personInputBlock {
             margin: 20px auto;
             text-align: center;
         }
@@ -22,48 +51,62 @@
         #inputBlock {
             float: left;
         }
+        #startGameButton{
+            position: absolute;
+            display: block;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 
 <body>
-    <div id="header">Игра в города</div>
+    <div id="header">
+        <div id="headerMain">Игра в города</div>
+        <div id="headerAdd">Вспоминай города. Пиши(Называй). Выигрывай у компьютера</div>
+    </div>
     <div id="startButtonBlock">
-        <button id="button" onclick="startGame()">Начать игру</button>
+        <button id="startGameButton" onclick="startGame()">Начать игру</button>
     </div>
-    <div id="infoBlock">
-        <div id="whosTurn">
-            <span id="personRoundText" style="display: block;">Ваша очередь</span>
-            <span id="computerRoundText" style="display:none;">Очередь компьютера</span>
+    <div id="mainBlock" style="display: none;">
+        <div id="infoBlock">
+            <div id="roundTextBlock">
+                <span id="personRoundText" style="display: none;">Ваша очередь</span>
+                <span id="computerRoundText" style="display:none;">Очередь компьютера</span>
+            </div>
+            <div id="timerBlock">Осталось: <span id="secondsLeft"></span></div>
         </div>
-        <div id="clock"></div>
-    </div>
 
-    <div id="inputGroup" style="display:none;">
-        <div id="inputBlock">
-            <input type="text" name="inputRec" id="inputRec">
-            <button id="button" onclick="inputSearch()">
-                Ввести город
-            </button>
+        <div id="personInputBlock">
+            <div id="inputBlock">
+                <input type="text" name="inputSearchField" id="inputSearchField">
+                <button id="inputSearchButton" onclick="inputSearch()">Введите город</button>
+            </div>
+            <div id="speechBlock">
+                <button id="speechSearchButton" onclick="speechSearch()">
+                    <i class="fas fa-microphone" id="startRecImg" style="font-size:24px"></i>
+                </button>
+            </div>
         </div>
-        <div id="micBlock">
-            <button id="button" onclick="startButton()">
-                <i class="fas fa-microphone" id="startRecImg" style="font-size:36px"></i>
-            </button>
+        <div id="outputBlock">
+            <label for="outputField">Названный город: </label>
+            <input type="text" name="outputField" id="outputField" readonly> 
         </div>
+        <div id="mapBlock" style="width: 600px; height: 400px; margin:0 auto; padding-top: 20px;"></div>
     </div>
-    <div id="outputBlock" style="display:none;">
-         <label for="outputRec">Названное слово: </label>
-         <input type="text" name="outputRec" id="outputRec" readonly> 
-    </div>
-    <div id="map" style="width: 600px; height: 400px; display:none;"></div>
-    <div id="results" style="display: block;">
+    <div id="resultsBlock" style="display: none;">
+        <div id="winnerTextBlock"><span id="whoIs"></span> ВЫИГРАЛ!</div>
         <table id="resultsTable">
             <tr>
                 <th>Компьютер</th>
                 <th>Человек</th>
             </tr>
-            </tbody>
         </table>
+        <div id="noteBlock" style="display:none;">'*' - означает, что данный город существует, но Яндекс карты о нем ничего не знают</div>
+        <div id="repeatButtonBlock">
+            <button id="repeatGameButton" onclick="startGame('again')">Сыграть снова<i class="fas fa-refresh" style="font-size:24px"></i></button>
+        </div>
     </div>
     <!-- <script>
 
@@ -122,7 +165,7 @@
             return s.replace(first_char, function (m) { return m.toUpperCase(); });
         }
 
-        function startButton(event) {
+        function speechSearch(event) {
             if (recognizing) {
                 recognition.stop();
                 return;
@@ -157,6 +200,9 @@
             computerList = [];
         var cityList = [ 'Шанхай', 'Пекин', 'Гуанчжоу', 'Харбин', 'Гонконг', 'Шэньчжэнь', 'Чунцин', 'Урумчи', 'Ухань', 'Ланьчжоу', 'Баотоу', 'Синин', 'Хэфэй', 'Гуйян', 'Шэньян', 'Далянь', 'Ляньюньган', 'Фучжоу', 'Сямынь', 'Хуанши', 'Чанша', 'Шаоян', 'Шицзячжуан', 'Таншань', 'Циньхуандао', 'Ханьдань', 'Чэндэ', 'Чжанцзякоу', 'Дацин', 'Хэган', 'Цзямусы', 'Цицикар', 'Чжэнчжоу', 'Аньян', 'Кайфэн', 'Пуян', 'Наньян', 'Пиндиншань', 'Лоян', 'Синьсян', 'Синьян', 'Гирин', 'Чанчунь', 'Наньчан', 'Нанкин', 'Уси', 'Чанчжоу', 'Сучжоу', 'Янчжоу', 'Янчэн', 'Сюйчжоу', 'Тайчжоу', 'Вэньчжоу', 'Нинбо', 'Ханчжоу', 'Цзинань', 'Циндао', 'Жичжао', 'Тайань', 'Яньтай', 'Цзыбо', 'Тайюань', 'Датун', 'Линьфынь', 'Сиань', 'Хуайань', 'Суцянь', 'Лицзян', 'Куньмин', 'Хух-Хото', 'Лючжоу', 'Наньнин', 'Тяньцзинь', 'Фуян', 'Иян', 'Юэян', 'Хайкоу', 'Хуайбэй', 'Хуайнань', 'Шаогуань', 'Фошань', 'Дунгуань', 'Шаньтоу', 'Чжаньцзян', 'Чжуншань', 'Чжухай', 'Инкоу', 'Ляоян', 'Фусинь', 'Фушунь', 'Бэньси', 'Аньшань', 'Гуанъюань', 'Наньчун', 'Чэньчжоу', 'Чэнду', 'Дэян', 'Цзыгун', 'Паньчжихуа', 'Эчжоу', 'Ичан', 'Мяньян', 'Линьи', 'Чжэньцзян', 'Ибинь', 'Уху', 'Вэйфан', 'Баодин', 'Баоцзи', 'Хэцзэ', 'Шанжао', 'Дунъин', 'Ляочэн', 'Бочжоу', 'Хэнъян', 'Путянь', 'Мумбай', 'Дели', 'Калькутта', 'Ченнай', 'Бангалор', 'Хайдарабад', 'Ахмадабад', 'Пуна', 'Сурат', 'Джайпур', 'Канпур', 'Лакхнау', 'Нагпур', 'Газиабад', 'Индаур', 'Коямпуттур', 'Кочин', 'Патна', 'Каликут', 'Бхопал', 'Триссур', 'Вадодара', 'Агра', 'Вишакхапатнам', 'Малаппурам', 'Тируванантапурам', 'Каннур', 'Лудхияна', 'Нашик', 'Виджаявада', 'Мадурай', 'Варанаси', 'Мирут', 'Фаридабад', 'Раджкот', 'Джамшедпур', 'Сринагар', 'Джабалпур', 'Асансол', 'Васаи-Вирар', 'Аллахабад', 'Дханбад', 'Кальян', 'Аурангабад', 'Амритсар', 'Джодхпур', 'Ранчи', 'Райпур', 'Коллам', 'Гвалиор', 'Бхилаи', 'Чандигарх', 'Тируччираппалли', 'Кота', 'Сан-Паулу', 'Рио-де-Жанейро', 'Салвадор', 'Бразилиа', 'Форталеза', 'Белу-Оризонти', 'Манаус', 'Куритиба', 'Ресифи', 'Порту-Алегри', 'Белен', 'Гояния', 'Гуарульюс', 'Кампинас', 'Сан-Луис', 'Сан-Гонсалу', 'Масейо', 'Москва', 'Санкт-Петербург Новосибирск', 'Екатеринбург', 'Нижний Новгород', 'Самара', 'Казань', 'Омск', 'Челябинск', 'Уфа', 'Ростов-на-Дону', 'Красноярск', 'Волгоград', 'Пермь', 'Воронеж', 'Джакарта', 'Сурабая', 'Бандунг', 'Бекаси', 'Медан', 'Тангеранг', 'Депок', 'Семаранг', 'Палембанг', 'Тангеранг-Селатан', 'Макасар', 'Батам', 'Пеканбару', 'Богор', 'Токио', 'Йокогама', 'Осака', 'Нагоя', 'Саппоро', 'Кобе', 'Киото', 'Фукуока', 'Кавасаки', 'Сайтама', 'Хиросима', 'Сэндай', 'Лагос', 'Кано', 'Ибадан; Бенин-Сити', 'Порт-Харкорт', 'Кадуна', 'Аба', 'Абуджа', 'Майдугури', 'Илорин', 'Варри', 'Мехико', 'Гвадалахара', 'Монтеррей', 'Пуэбла-де-Сарагоса', 'Чиуауа', 'Сьюдад-Хуарес', 'Тихуана', 'Леон', 'Несауалькойотль', 'Сапопан', 'Сеул', 'Пусан', 'Инчхон', 'Тэгу', 'Тэджон', 'Кванджу', 'Чханвон', 'Сувон', 'Ульсан', 'Соннам', 'Нью-Йорк', 'Лос-Анджелес', 'Чикаго', 'Хьюстон', 'Финикс', 'Филадельфия', 'Сан-Антонио', 'Даллас', 'Сан-Диего', 'Карачи', 'Лахор', 'Фейсалабад', 'Равалпинди', 'Хайдарабад', 'Мултан', 'Гуджранвала', 'Пешавар', 'Исламабад', 'Тегеран', 'Мешхед', 'Кередж', 'Тебриз', 'Шираз', 'Исфахан', 'Кум', 'Ахваз', 'Стамбул', 'Анкара', 'Измир', 'Бурса', 'Адана', 'Газиантеп', 'Сидней', 'Мельбурн', 'Брисбен', 'Перт', 'Аделаида', 'Йоханнесбург', 'Кейптаун', 'Претория', 'Дурбан', 'Соуэто', 'Дакка', 'Читтагонг', 'Нараянгандж', 'Кхулна', 'Газипур', 'Каир', 'Александрия', 'Гиза', 'Шубра-Эль-Хейма', 'Богота', 'Барранкилья', 'Кали', 'Медельин', 'Каракас', 'Маракайбо', 'Валенсия', 'Баркисимето', 'Манила', 'Кесон-Сити', 'Калукан', 'Давао', 'Эр-Рияд', 'Джидда', 'Мекка', 'Медина', 'Берлин', 'Мюнхен', 'Гамбург', 'Кёльн', 'Багдад', 'Мосул', 'Басра', 'Эрбиль', 'Киншаса', 'Лубумбаши', 'Мбужи-Майи', 'Кананга', 'Касабланка', 'Рабат', 'Марракеш', 'Фес', 'Киев', 'Харьков', 'Одесса', 'Буэнос-Айрес', 'Кордова', 'Росарио', 'Ханой', 'Хошимин', 'Хайфон', 'Тайбэй', 'Гаосюн', 'Тайчжун', 'Торонто', 'Монреаль', 'Лондон', 'Бирмингем', 'Мадрид', 'Барселона', 'Рим', 'Милан', 'Алма-Ата', 'Астана', 'Дамаск', 'Халеб', 'Кито', 'Гуаякиль', 'Аккра', 'Кумаси', 'Дуала', 'Яунде', 'Хартум', 'Омдурман', 'Санта-Крус-де-ла-Сьерра', 'Эль-Альто', 'Янгон', 'Мандалай', 'Найроби', 'Дубай', 'Бангкок', 'Сингапур', 'Белград', 'Хараре', 'Сана', 'Мапуту', 'Вена', 'Монровия', 'Куала-Лумпур', 'Конакри', 'Окленд', 'Тегусигальпа', 'Гватемала', 'Абиджан', 'Браззавиль', 'Манагуа', 'Пномпень', 'Монтевидео', 'Уагадугу', 'София', 'Бейрут', 'Антананариву', 'Сантьяго', 'Аддис-Абеба', 'Бамако', 'Луанда', 'Порт-о-Пренс', 'Гавана', 'Могадишо', 'Санто-Доминго', 'Дакар', 'Лима', 'Дар-эс-Салам', 'Лусака', 'Кампала', 'Триполи', 'Алжир', 'Пхеньян', 'Амман', 'Минск', 'Бухарест', 'Варшава', 'Прага', 'Будапешт', 'Афины', 'Баку', 'Ереван', 'Тбилиси', 'Кабул', 'Ташкент', 'Улан-Батор', 'Париж'];
         var row;
+        var noteBlockFlag = true;
+        var timer;
+        var stopLetters = ['ь', 'ъ', 'ы', 'й'];
         var recognition = new SpeechRecognition();
         recognition.lang = 'ru-RU'
         //        recognition.continuous = false;
@@ -197,7 +243,7 @@
 
             for (var i = 0; i < event.results.length; ++i) {
                 if (event.results) {
-                    outputRec.value += event.results[i][0].transcript;
+                    outputField.value += event.results[i][0].transcript;
                     checkCityInLists(event.results[i][0].transcript, true, personList);
                 }
             }
@@ -205,29 +251,29 @@
 
         function reset() {
             recognizing = false;
-            button.innerHTML = "Click to Speak";
+            speechSearchButton.innerHTML = "Click to Speak";
         }
 
-        function startButton() {
+        function speechSearch() {
             if (recognizing) {
                 recognition.stop();
                 reset();
             } else {
                 recognition.start();
-                button.innerHTML = "Click to Stop";
+                speechSearchButton.innerHTML = "Click to Stop";
             }
         }
         function inputSearch(){
-            var city = inputRec.value.toLowerCase();
+            var city = inputSearchField.value.toLowerCase();
             if (personList.length > 0){
                 var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
             }
-            if(city && city.length > 3){
+            if(city && city.length > 2){
                 if( personList.length > 0 && city.charAt(0) == lastLetter){
                     checkCityInLists(city, true, personList);
                 }
                 else if(personList.length == 0){
-                    map.style.display = 'block';
+                    timerBlock.style.display = 'block';
                     checkCityInLists(city, true, personList);
                 }
                 else{
@@ -240,15 +286,16 @@
         }
         function countdownTimer(opponent){
             if (typeof timer !== 'undefined') clearInterval(timer);
-            var countDownDate = new Date().getTime() + 20000;
+            var countDownDate = new Date().getTime() + 5000;
             timer = setInterval(function () {
                 var now = new Date().getTime();
                 var distance = countDownDate - now;
                 var seconds = Math.floor((distance % (1000 * 60)) / 1200);
-                clock.innerHTML = seconds + "s ";
+                secondsLeft.innerHTML = seconds + "s ";
                 if (distance < 0) {
                     clearInterval(timer);
-                    clock.innerHTML = "Игра окончена";
+                    timerBlock.style.display = 'none';
+                    // .innerHTML = "Игра окончена";
                     checkWinner();
                 }
             }, 1000);
@@ -264,27 +311,57 @@
         function computerRound(){ 
             computerRoundText.style.display = "block";
             personRoundText.style.display = "none";
+            personInputBlock.style.display = 'block';
+
+            document.body.style.backgroundColor = '#f33';
             //block inputa i bottuna
-            var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
-            var letterCityList = cityList.filter(x => x.charAt(0)== lastLetter.toUpperCase());
-            var letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].toLowerCase();
-            console.log('computeword is' + letterRandName);
-            checkCityInLists(letterRandName, false, computerList);
+            setTimeout(function(){
+                var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
+                var letterCityList = cityList.filter(x => x.charAt(0)== lastLetter.toUpperCase());
+                var letterRandName = '';
+                try{
+                letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].toLowerCase();
+                }catch(e){
+                    clearInterval(timer);
+                    timerBlock.style.display = 'none';
+                    // .innerHTML = "Игра окончена";
+                    checkWinner();
+                }
+                // console.log('computeword is' + letterRandName);
+                checkCityInLists(letterRandName, false, computerList);
+            }, 2000);
         }
         function getRandomArbitrary(min, max) {
-                return Math.round((Math.random() * (max - min) + min));
+                return Math.floor((Math.random() * (max - min) + min));
             }
 
         function personRound(){
+            personInputBlock.style.display = 'block';
+            document.body.style.backgroundColor = '#33ff33';
+
             computerRoundText.style.display = "none";
             personRoundText.style.display = "block";
             
+            // checkCityInLists(letterRandName, true, personList);
             //unblock inputa i  buttona
             //zapusk timera
-            var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
-            var letterCityList = cityList.filter(x => x.charAt(0) == lastLetter.toUpperCase());
-            var letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)];
-            checkCityInLists(letterRandName, true, personList);
+            setTimeout(function () {
+                if(computerList.length > 0){
+                    var lastLetter = (stopLetters.includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
+                    var letterCityList = cityList.filter(x => x.charAt(0) == lastLetter.toUpperCase());
+                    var letterRandName = '';
+                        try {
+                            letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].toLowerCase();
+                        } catch (e) {
+                            clearInterval(timer);
+                            timerBlock.style.display = 'none';
+                            // .innerHTML = "Игра окончена";
+                            checkWinner();
+                        }
+                    checkCityInLists(letterRandName, true, personList);
+                
+                }
+                        }, 2000);
 
         }
 
@@ -292,11 +369,12 @@
 
             if (personList.includes(city) || computerList.includes(city)) {
                 if (opponent == false) {
-                    alert('Компьютер ошибся!')
+                    console.log('Компьютер ошибся!');
                     computerRound();
                 }
                 else{
                     alert('Ошибка! Данное слово уже использовалось! Введите другое слово!');
+                    return;
                 }
             }
             else {
@@ -306,22 +384,28 @@
         function checkCityOnMapAndPush(city, opponent, opponentList) {
             var flag = true;
             var myGeocoder = ymaps.geocode(city, { kind: 'locality', results: 1 });
+            
             var iconColor = ((opponent == true) ? 'islands#darkBlueDotIconWithCaption' : 'islands#redDotIconWithCaption');
             row =  ((opponent == true) ?  resultsTable.insertRow(1) : row);
             myGeocoder.then(
                 function (res) {
                     // Выбираем первый результат геокодирования.
-                    var firstGeoObject = res.geoObjects.get(0),
+                    var obj = res.geoObjects.get(0);
+                    /*проблема с отсутсвующими на карте объектами пока не решена*/
+                    if (!obj) {
+                        // city = city + ' *';
+                    }
                         // Координаты геообъекта.
-                        coords = firstGeoObject.geometry.getCoordinates(),
+                    var coords = obj.geometry.getCoordinates();
                         // Область видимости геообъекта.
-                        bounds = firstGeoObject.properties.get('boundedBy');
+                    var bounds = obj.properties.get('boundedBy');
+                    
 
-                    firstGeoObject.options.set('preset', iconColor);
+                    obj.options.set('preset', iconColor);
                     // Получаем строку с адресом и выводим в иконке геообъекта.
-                    firstGeoObject.properties.set('iconCaption', city.charAt(0).toUpperCase() + city.slice(1));
+                    obj.properties.set('iconCaption', city.charAt(0).toUpperCase() + city.slice(1));
                     // Добавляем первый найденный геообъект на карту.
-                    myMap.geoObjects.add(firstGeoObject);
+                    myMap.geoObjects.add(obj);
                 },
                 function (err) {
                     flag = false;
@@ -329,44 +413,81 @@
                 }
             );
             if(flag){
-                outputRec.value = city.charAt(0).toUpperCase() + city.slice(1);
-                console.log(city);
+                // var cityTotalBefore = ymaps.geoQuery(myMap.geoObjects).searchIntersect(myMap).getLength();
+                // if(cityTotalBefore < (personList.length + computerList.length) && noteBlockFlag){
+                //     row.lastElementChild.textContent += ' *';
+                //     noteBlockFlag = false;
+                // }
+                // console.log(cityTotalBefore);
+                outputField.value = city.charAt(0).toUpperCase() + city.slice(1);
+                // console.log(city);
                 row.insertCell(+(!opponent)).innerHTML = city.charAt(0).toUpperCase() + city.slice(1);
                 opponentList.push(city);
                 countdownTimer(!opponent);
             }
         }
+        function callMe(fakeFlag){
+            flag = fakeFlag;
+        }
 
-        function startGame(){
-            inputGroup.style.display = 'block';
-            outputBlock.style.display = 'block';
+        function startGame(again){
+           
+            computerRoundText.style.display = "none";
+            personRoundText.style.display = "block";
             startButtonBlock.style.display = 'none';
-            document.body.style.backgroundColor = '#527a52';
-            document.body.style.color = 'white';
-
+            mainBlock.style.display = 'block';
+            if(again){
+                init();
+                personList = [];
+                computerList = [];
+                inputSearchField.value = '';
+                outputField.value = '';
+                row = undefined;
+                noteBlockFlag = true;
+                for (var i = resultsTable.rows.length - 1; i > 0; i--) {
+                    resultsTable.deleteRow(i)
+                }
+                noteBlock.style.display = 'none';
+                resultsBlock.style.display = 'none';
+            }
+            else{
+                document.body.style.color = 'white';
+                header.setAttribute('id', 'headerInGame');
+            }
+            personRound();
         }
 
         function checkWinner(){
-
+            mainBlock.style.display = 'none';
+            myMap.destroy();
+            myMap = null;
+            if(personList.length > computerList.length){
+                whoIs.innerHTML = 'ТЫ';
+            }
+            else{
+                 whoIs.innerHTML = 'КОМПЬЮТЕР';
+            }
+            resultsBlock.style.display="block";
+            if(!noteBlockFlag){
+                noteBlock.style.display = 'block';
+            }
         }
 
 
-        /****map****/
-       
-        // Дождёмся загрузки API и готовности DOM.
-        ymaps.ready(init);
+        /****mapBlock****/
 
+        ymaps.ready(init);
         function init() {
+            
             // Создание экземпляра карты и его привязка к контейнеру с
-            // заданным id ("map").
-            myMap = new ymaps.Map('map', {
+            // заданным id ("mapBlock").
+            myMap = new ymaps.Map('mapBlock', {
                 // При инициализации карты обязательно нужно указать
                 // её центр и коэффициент масштабирования.
-                center: [55.76, 37.64], // Москва
+                center: [53.55, 27.33], // Минск
                 zoom: 1
-            }, {
-                    searchControlProvider: 'yandex#search'
-                });
+            });
+
         }
     </script>
 </body>
