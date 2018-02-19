@@ -31,32 +31,90 @@
         #headerMain{
             font-size: 2em;
         }
-        #startGameButton{
-            background-color: #223a5e;
-            border: none;
-            color: white;
-            padding: 16px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-        }
-        #mainBlock{
-            
-        }
-        #personInputBlock {
-            margin: 20px auto;
+
+        #mainBlock, #resultsBlock{
             text-align: center;
         }
 
-        #inputBlock {
-            float: left;
+        #personInputBlock{
+            width:100%;
+            margin: 16px auto;
+        }
+        #inputBlock{
+            display: inline-block;
+        }
+        #inputSearchField, #outputField{
+            padding: 8px;
+            display: inline-block;
+            border: 1px solid #ccc!important;
+            font-size: 1.2em;
+            width: 250px;
+            height: 40px;
+        }
+
+        #outputBlock{
+            padding: 16px;
+        }
+
+        #winnerTextBlock{
+            font-size: 2em;
+            padding: 48px 0;
+        }
+        #startGameButton, #inputSearchButton, #speechSearchButton, #repeatGameButton{
+            background-color: #223a5e;
+            border: none;
+            color: #fff;
+            padding: 16px 32px;
+            text-align: center;
+            text-decoration: none;
+            position: absolute;
+            display: inline-block;
+
         }
         #startGameButton{
-            position: absolute;
             display: block;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+        }
+        #inputSearchButton{
+            background-color: #005960;
+            position: relative;
+        }
+        #speechSearchButton{
+            background-color: #898e8c;
+            position: relative;
+        }
+        #repeatGameButton{
+            background-color: #672e3b;
+        }
+        @-webkit-keyframes pulse {
+            0% {
+                opacity: 0;
+                filter: alpha(opacity=0);
+            }
+            50% {
+                opacity: 1;
+                filter: alpha(opacity=100);
+            }
+            100% {
+                opacity: 0;
+                filter: alpha(opacity=50);
+            }
+        }
+        @keyframes pulse {
+            0% {
+                opacity: 0;
+                filter: alpha(opacity=0);
+            }
+            50% {
+                opacity: 1;
+                filter: alpha(opacity=100);
+            }
+            100% {
+                opacity: 0;
+                filter: alpha(opacity=50);
+            }
         }
     </style>
 </head>
@@ -67,7 +125,7 @@
         <div id="headerAdd">Вспоминай города. Пиши(Называй). Выигрывай у компьютера</div>
     </div>
     <div id="startButtonBlock">
-        <button id="startGameButton" onclick="startGame()">Начать игру</button>
+        <div id="startGameButton" onclick="startGame()">Начать игру</div>
     </div>
     <div id="mainBlock" style="display: none;">
         <div id="infoBlock">
@@ -81,16 +139,14 @@
         <div id="personInputBlock">
             <div id="inputBlock">
                 <input type="text" name="inputSearchField" id="inputSearchField">
-                <button id="inputSearchButton" onclick="inputSearch()">Введите город</button>
             </div>
-            <div id="speechBlock">
-                <button id="speechSearchButton" onclick="speechSearch()">
-                    <i class="fas fa-microphone" id="startRecImg" style="font-size:24px"></i>
-                </button>
+            <div id="inputSearchButton" onclick="inputSearch()">Введите город</div>
+            <div id="speechSearchButton" onclick="speechSearch()">
+                <i class="fas fa-microphone" id="speechRec" style="font-size:24px"></i>
             </div>
         </div>
         <div id="outputBlock">
-            <label for="outputField">Названный город: </label>
+            <label for="outputField">Названный соперником город: </label>
             <input type="text" name="outputField" id="outputField" readonly> 
         </div>
         <div id="mapBlock" style="width: 600px; height: 400px; margin:0 auto; padding-top: 20px;"></div>
@@ -105,94 +161,10 @@
         </table>
         <div id="noteBlock" style="display:none;">'*' - означает, что данный город существует, но Яндекс карты о нем ничего не знают</div>
         <div id="repeatButtonBlock">
-            <button id="repeatGameButton" onclick="startGame('again')">Сыграть снова<i class="fas fa-refresh" style="font-size:24px"></i></button>
+            <div id="repeatGameButton" onclick="startGame('again')">Сыграть снова<i class="fas fa-refresh" style="font-size:24px"></i></div>
         </div>
     </div>
-    <!-- <script>
 
-        var final_transcript = '';
-        var recognizing = false;
-        var ignore_onend;
-        var start_timestamp;
-        var recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-
-        recognition.onstart = function () {
-            recognizing = true;
-            start_img.src = '/intl/en/chrome/assets/common/images/content/mic-animate.gif';
-        };
-
-        recognition.onend = function () {
-            recognizing = false;
-            if (ignore_onend) {
-                return;
-            }
-            start_img.src = '/intl/en/chrome/assets/common/images/content/mic.gif';
-        };
-
-        recognition.onresult = function (event) {
-            var interim_transcript = '';
-            if (typeof (event.results) == 'undefined') {
-                recognition.onend = null;
-                recognition.stop();
-                upgrade();
-                return;
-            }
-            for (var i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    final_transcript += event.results[i][0].transcript;
-                } else {
-                    interim_transcript += event.results[i][0].transcript;
-                }
-            }
-            final_transcript = capitalize(final_transcript);
-            final_span.innerHTML = linebreak(final_transcript);
-            interim_span.innerHTML = linebreak(interim_transcript);
-            if (final_transcript || interim_transcript) {
-                showButtons('inline-block');
-            }
-        };
-
-        var two_line = /\n\n/g;
-        var one_line = /\n/g;
-        function linebreak(s) {
-            return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-        }
-
-        var first_char = /\S/;
-        function capitalize(s) {
-            return s.replace(first_char, function (m) { return m.toUpperCase(); });
-        }
-
-        function speechSearch(event) {
-            if (recognizing) {
-                recognition.stop();
-                return;
-            }
-            final_transcript = '';
-            recognition.lang = 'ru-RU';
-            recognition.start();
-            ignore_onend = false;
-            final_span.innerHTML = '';
-            interim_span.innerHTML = '';
-            start_img.src = '/intl/en/chrome/assets/common/images/content/mic-slash.gif';
-            start_timestamp = event.timeStamp;
-        }
-
-        function showInfo(s) {
-            if (s) {
-                for (var child = info.firstChild; child; child = child.nextSibling) {
-                    if (child.style) {
-                        child.style.display = child.id == s ? 'inline' : 'none';
-                    }
-                }
-                info.style.visibility = 'visible';
-            } else {
-                info.style.visibility = 'hidden';
-            }
-        }
-    </script> -->
     <script type="text/javascript">
         var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
         var recognizing;
@@ -205,16 +177,13 @@
         var stopLetters = ['ь', 'ъ', 'ы', 'й'];
         var recognition = new SpeechRecognition();
         recognition.lang = 'ru-RU'
-        //        recognition.continuous = false;
-        //        recognition.interimResults = false; 
         reset();
         recognition.onend = reset;
 
         recognition.onstart = function () {
             recognizing = true;
-            //подсветка кнопки + блокируем инпут
-            // showInfo('info_speak_now');
-            // start_img.src = '/intl/en/chrome/assets/common/images/content/mic-animate.gif';
+            speechRec.style.color = '#a6001a';
+            speechRec.style.animation = 'pulse 1s infinite';
         };
         recognition.onerror = function (event) {
             // Что будет при ошибке?
@@ -238,35 +207,46 @@
             // }
         };
 
+        recognition.onend = function () {
+            recognizing = false;
+            speechRec.style.color = '#fff';
+            speechRec.style.animation = '';
+        };
 
         recognition.onresult = function (event) {
-
             for (var i = 0; i < event.results.length; ++i) {
                 if (event.results) {
-                    outputField.value += event.results[i][0].transcript;
-                    checkCityInLists(event.results[i][0].transcript, true, personList);
+                    recognizing = true;
+                    inputSearchField.value = event.results[i][0].transcript;
+                    outputField.value = event.results[i][0].transcript;
+                    speechRec.style.color = '#fff';
+                    speechRec.style.animation = '';
+                    inputSearch();
                 }
             }
         }
 
         function reset() {
             recognizing = false;
-            speechSearchButton.innerHTML = "Click to Speak";
         }
 
         function speechSearch() {
             if (recognizing) {
+                inputSearchField.disabled = false;
+                inputSearchButton.style.display  = 'block';
                 recognition.stop();
                 reset();
             } else {
+                inputSearchField.disabled = true;
+                inputSearchButton.style.visibility = 'hidden';
                 recognition.start();
-                speechSearchButton.innerHTML = "Click to Stop";
+
             }
         }
         function inputSearch(){
             var city = inputSearchField.value.toLowerCase();
             if (personList.length > 0){
-                var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
+                var lastLetter = (stopLetters.includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
             }
             if(city && city.length > 2){
                 if( personList.length > 0 && city.charAt(0) == lastLetter){
@@ -286,7 +266,7 @@
         }
         function countdownTimer(opponent){
             if (typeof timer !== 'undefined') clearInterval(timer);
-            var countDownDate = new Date().getTime() + 5000;
+            var countDownDate = new Date().getTime() + 20000;
             timer = setInterval(function () {
                 var now = new Date().getTime();
                 var distance = countDownDate - now;
@@ -304,6 +284,7 @@
                 }
             else {
                 personRound();
+
             }
         }
 
@@ -313,10 +294,10 @@
             personRoundText.style.display = "none";
             personInputBlock.style.display = 'block';
 
-            document.body.style.backgroundColor = '#f33';
+            document.body.style.backgroundColor = '#f2552c';
             //block inputa i bottuna
             setTimeout(function(){
-                var lastLetter = (['ь', 'ъ', 'ы', 'й'].includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
+                var lastLetter = (stopLetters.includes(personList[personList.length-1].slice(-1))? personList[personList.length - 1].slice(-2,-1) : personList[personList.length - 1].slice(-1));
                 var letterCityList = cityList.filter(x => x.charAt(0)== lastLetter.toUpperCase());
                 var letterRandName = '';
                 try{
@@ -337,31 +318,31 @@
 
         function personRound(){
             personInputBlock.style.display = 'block';
-            document.body.style.backgroundColor = '#33ff33';
+            document.body.style.backgroundColor = '#4F84C4';
 
             computerRoundText.style.display = "none";
             personRoundText.style.display = "block";
             
-            // checkCityInLists(letterRandName, true, personList);
+            checkCityInLists(letterRandName, true, personList);
             //unblock inputa i  buttona
             //zapusk timera
-            setTimeout(function () {
-                if(computerList.length > 0){
-                    var lastLetter = (stopLetters.includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
-                    var letterCityList = cityList.filter(x => x.charAt(0) == lastLetter.toUpperCase());
-                    var letterRandName = '';
-                        try {
-                            letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].toLowerCase();
-                        } catch (e) {
-                            clearInterval(timer);
-                            timerBlock.style.display = 'none';
-                            // .innerHTML = "Игра окончена";
-                            checkWinner();
-                        }
-                    checkCityInLists(letterRandName, true, personList);
+            // setTimeout(function () {
+            //     if(computerList.length > 0){
+            //         var lastLetter = (stopLetters.includes(computerList[computerList.length - 1].slice(-1)) ? computerList[computerList.length - 1].slice(-2, -1) : computerList[computerList.length - 1].slice(-1));
+            //         var letterCityList = cityList.filter(x => x.charAt(0) == lastLetter.toUpperCase());
+            //         var letterRandName = '';
+            //             try {
+            //                 letterRandName = letterCityList[getRandomArbitrary(0, letterCityList.length)].toLowerCase();
+            //             } catch (e) {
+            //                 clearInterval(timer);
+            //                 timerBlock.style.display = 'none';
+            //                 // .innerHTML = "Игра окончена";
+            //                 checkWinner();
+            //             }
+            //         checkCityInLists(letterRandName, true, personList);
                 
-                }
-                        }, 2000);
+            //     }
+            //             }, 2000);
 
         }
 
@@ -384,9 +365,12 @@
         function checkCityOnMapAndPush(city, opponent, opponentList) {
             var flag = true;
             var myGeocoder = ymaps.geocode(city, { kind: 'locality', results: 1 });
-            
-            var iconColor = ((opponent == true) ? 'islands#darkBlueDotIconWithCaption' : 'islands#redDotIconWithCaption');
-            row =  ((opponent == true) ?  resultsTable.insertRow(1) : row);
+            var iconColor = 'islands#redDotIconWithCaption';
+
+            if(opponent){
+                iconColor = 'islands#darkBlueDotIconWithCaption';
+                row =  resultsTable.insertRow(1)
+            }
             myGeocoder.then(
                 function (res) {
                     // Выбираем первый результат геокодирования.
@@ -423,6 +407,9 @@
                 // console.log(city);
                 row.insertCell(+(!opponent)).innerHTML = city.charAt(0).toUpperCase() + city.slice(1);
                 opponentList.push(city);
+                if(!opponent){
+                    inputSearchField.value = stopLetters.includes(city) ? city.charAt(city.length - 2).toUpperCase() : city.charAt(city.length - 1).toUpperCase();
+                }
                 countdownTimer(!opponent);
             }
         }
@@ -463,9 +450,11 @@
             myMap = null;
             if(personList.length > computerList.length){
                 whoIs.innerHTML = 'ТЫ';
+                document.body.style.backgroundColor = '#4F84C4';
             }
             else{
                  whoIs.innerHTML = 'КОМПЬЮТЕР';
+                 document.body.style.backgroundColor = '#f2552c';
             }
             resultsBlock.style.display="block";
             if(!noteBlockFlag){
