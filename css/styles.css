@@ -1,0 +1,121 @@
+html, body{
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 20px;
+    font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+}
+#header {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: .8em;
+    text-align: center;
+}
+#headerInGame{
+    position: relative;
+    margin: 40px auto;
+    text-align: center;
+}
+#headerMain{
+    font-size: 2em;
+}
+
+#mainBlock, #resultsBlock{
+    text-align: center;
+}
+
+#personInputBlock{
+    width:100%;
+    margin: 16px auto;
+}
+#inputBlock{
+    display: inline-block;
+}
+#inputSearchField, #outputField{
+    padding: 8px;
+    display: inline-block;
+    border: 1px solid #ccc!important;
+    font-size: 1.2em;
+    width: 250px;
+    height: 40px;
+}
+
+#outputBlock{
+    padding: 16px;
+}
+
+#resultsTable{
+    margin: 16px auto;
+}
+
+#resultsTable th,td{
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#winnerTextBlock{
+    font-size: 2em;
+    padding: 48px 0;
+}
+#startGameButton, #inputSearchButton, #speechSearchButton, #repeatGameButton{
+    background-color: #223a5e;
+    border: none;
+    color: #fff;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    position: absolute;
+    display: inline-block;
+
+}
+#startGameButton{
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+#inputSearchButton{
+    background-color: #005960;
+    position: relative;
+}
+#speechSearchButton{
+    background-color: #898e8c;
+    position: relative;
+}
+#repeatGameButton{
+    background-color: #672e3b;
+    display: block;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+@-webkit-keyframes pulse {
+    0% {
+        opacity: 0;
+        filter: alpha(opacity=0);
+    }
+    50% {
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    100% {
+        opacity: 0;
+        filter: alpha(opacity=50);
+    }
+}
+@keyframes pulse {
+    0% {
+        opacity: 0;
+        filter: alpha(opacity=0);
+    }
+    50% {
+        opacity: 1;
+        filter: alpha(opacity=100);
+    }
+    100% {
+        opacity: 0;
+        filter: alpha(opacity=50);
+    }
+}
